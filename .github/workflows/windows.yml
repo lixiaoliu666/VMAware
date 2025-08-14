@@ -25,4 +25,4 @@ on:
       - "uses": "actions/upload-artifact@main"
         "with":
           "path": "build\\Release\\vmaware.exe"
-          "name": "vmaware"
+          "name": "vmaware64_release"
