@@ -5794,7 +5794,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
 
             // 5) FADT specific checks
             if (memcmp(hdr.Signature, "FACP", 4) == 0) {
-                if (hdr.Revision < 4 || hdr.Length < 245) { // Most VMs use an older-style FADT of length 244  bytes (revision  3), cutting off before the Sleep Control/Status registers and Hypervisor ID
+                if (hdr.Revision < 4 || hdr.Length < 244) { // Most VMs use an older-style FADT of length 244  bytes (revision  3), cutting off before the Sleep Control/Status registers and Hypervisor ID
                     debug("FIRMWARE: FACP indicates VM (rev ", int(hdr.Revision), "), ", "(length ", hdr.Length, ")");
                     return true;
                 }
