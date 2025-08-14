@@ -749,99 +749,27 @@ static void general() {
         }
     #endif
 
-    checker(VM::VMID, "VMID");
+  
     checker(VM::CPU_BRAND, "CPU brand");
     checker(VM::HYPERVISOR_BIT, "CPUID hypervisor bit");
     checker(VM::HYPERVISOR_STR, "hypervisor str");
     checker(VM::TIMER, "timing anomalies");
-    checker(VM::THREAD_COUNT, "thread count");
-    checker(VM::MAC, "MAC addresses");
-    checker(VM::TEMPERATURE, "temperature");
-    checker(VM::SYSTEMD, "systemd virtualisation");
-    checker(VM::CVENDOR, "chassis vendor");
-    checker(VM::CTYPE, "chassis type");
-    checker(VM::DOCKERENV, "Dockerenv");
-    checker(VM::DMIDECODE, "dmidecode output");
-    checker(VM::DMESG, "dmesg output");
-    checker(VM::HWMON, "hwmon presence");
-    checker(VM::DLL, "DLLs");
+    
     checker(VM::REGISTRY_KEYS, "registry keys");
-    checker(VM::WINE, "Wine");
-    checker(VM::HWMODEL, "hw.model");
-    checker(VM::DISK_SIZE, "disk size");
-    checker(VM::VBOX_DEFAULT, "VBox default specs");
-    checker(VM::PROCESSES, "processes");
-    checker(VM::LINUX_USER_HOST, "default Linux user/host");
-    checker(VM::GAMARUE, "gamarue ransomware technique");
-    checker(VM::BOCHS_CPU, "BOCHS CPU techniques");
-    checker(VM::MAC_MEMSIZE, "MacOS hw.memsize");
-    checker(VM::MAC_IOKIT, "MacOS registry IO-kit");
-    checker(VM::IOREG_GREP, "IO registry grep");
-    checker(VM::MAC_SIP, "MacOS SIP");
-    checker(VM::REGISTRY_VALUES, "registry values");
+    
     checker(VM::AUDIO, "audio device");
-    checker(VM::VPC_INVALID, "VPC invalid instructions");
-    checker(VM::SIDT, "SIDT");
-    checker(VM::SGDT, "SGDT");
-    checker(VM::SLDT, "SLDT");
-    checker(VM::SMSW, "SMSW");
-    checker(VM::VMWARE_IOMEM, "/proc/iomem file");
-    checker(VM::VMWARE_IOPORTS, "/proc/ioports file");
-    checker(VM::VMWARE_SCSI, "/proc/scsi/scsi file");
-    checker(VM::VMWARE_DMESG, "VMware dmesg");
-    checker(VM::VMWARE_STR, "STR instruction");
-    checker(VM::VMWARE_BACKDOOR, "VMware IO port backdoor");
-    checker(VM::MUTEX, "mutex strings");
-    checker(VM::ODD_CPU_THREADS, "odd thread count number");
-    checker(VM::INTEL_THREAD_MISMATCH, "Intel thread count mismatch");
-    checker(VM::XEON_THREAD_MISMATCH, "Intel Xeon thread count mismatch");
-    checker(VM::AMD_THREAD_MISMATCH, "AMD thread count mismatch");
-    checker(VM::CUCKOO_DIR, "Cuckoo directory");
-    checker(VM::CUCKOO_PIPE, "Cuckoo pipe");
-    checker(VM::HYPERV_HOSTNAME, "Hyper-V Azure hostname");
-    checker(VM::GENERAL_HOSTNAME, "general VM hostnames");
-    checker(VM::DISPLAY, "display");
-    checker(VM::DEVICE_STRING, "bogus device string");
-    checker(VM::BLUESTACKS_FOLDERS, "BlueStacks folders");
+    
     checker(VM::CPUID_SIGNATURE, "CPUID signatures");
-    checker(VM::KGT_SIGNATURE, "Intel KGT signature");
-    checker(VM::QEMU_VIRTUAL_DMI, "QEMU virtual DMI directory");
-    checker(VM::QEMU_USB, "QEMU USB");
-    checker(VM::HYPERVISOR_DIR, "hypervisor directory (Linux)");
-    checker(VM::UML_CPU, "User-mode Linux CPU");
-    checker(VM::KMSG, "/dev/kmsg hypervisor message");
-    checker(VM::VBOX_MODULE, "VBox kernel module");
-    checker(VM::SYSINFO_PROC, "/proc/sysinfo");
-    checker(VM::DMI_SCAN, "DMI scan");
-    checker(VM::SMBIOS_VM_BIT, "SMBIOS VM bit");
-    checker(VM::PODMAN_FILE, "podman file");
-    checker(VM::WSL_PROC, "WSL string in /proc");
-    checker(anyrun_driver, "ANY.RUN driver");
-    checker(anyrun_directory, "ANY.RUN directory");
-    checker(VM::DRIVERS, "driver names");
-    checker(VM::DISK_SERIAL, "disk serial number");
-    checker(VM::IVSHMEM, "IVSHMEM device");
+    
     checker(VM::GPU_CAPABILITIES, "GPU capabilities");
-    checker(VM::LOGICAL_PROCESSORS, "logical processor count");
-    checker(VM::PHYSICAL_PROCESSORS, "physical processor count");
-    checker(VM::POWER_CAPABILITIES, "power capabilities");
-    checker(VM::QEMU_FW_CFG, "QEMU fw_cfg device");
-    checker(VM::VIRTUAL_PROCESSORS, "virtual processors");
-    checker(VM::HYPERV_QUERY, "hypervisor query");
-    checker(VM::AMD_SEV, "AMD-SEV MSR");
-    checker(VM::VIRTUAL_REGISTRY, "registry emulation");
+   
     checker(VM::FIRMWARE, "firmware");
-    checker(VM::FILE_ACCESS_HISTORY, "low file access count");
-    checker(VM::NSJAIL_PID, "nsjail PID");
+   
     checker(VM::TPM, "TPM manufacturer");
     checker(VM::PCI_DEVICES, "PCI vendor/device ID");
     checker(VM::ACPI_SIGNATURE, "ACPI device signatures");
     checker(VM::TRAP, "hypervisor interception");
-    checker(VM::UD, "undefined exceptions");
-    checker(VM::BLOCKSTEP, "single step with trap flag");
-    checker(VM::DBVM, "Dark Byte's hypervisor");
-    checker(VM::BOOT_LOGO, "boot logo");
-    checker(VM::MAC_SYS, "system profiler");
+    
     // ADD NEW TECHNIQUE CHECKER HERE
 
     std::printf("\n");
