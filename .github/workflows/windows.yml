@@ -29,5 +29,5 @@ on:
       - "run": "cmd.exe /c .github\\workflows\\build_run_win_64_debug.bat"
       - "uses": "actions/upload-artifact@main"
         "with":
-          "path": "build\\Release\\*"
+          "path": "build\\Debug\\*"
           "name": "vmaware64_debug.exe"
