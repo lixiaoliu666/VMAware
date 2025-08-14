@@ -2163,6 +2163,11 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             }
 			debug("HYPERVISOR_STR: strlen(out + 4)=", strlen(out + 4),
 				"\nout+4: ", out + 4);
+			debug("HYPERVISOR_STR: \neax: ", out[0],
+                "\nebx: ", out[1],
+                "\necx: ", out[2],
+                "\nedx: ", out[3]
+            );
             return (std::strlen(out + 4) >= 4);
         #endif
     }
