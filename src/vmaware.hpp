@@ -2148,9 +2148,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         #if (!x86)
             return false;
         #else
-            if (util::hyper_x() == HYPERV_ARTIFACT_VM) {
-                return false;
-            }
+            
     
             char out[sizeof(i32) * 4 + 1] = { 0 }; // e*x size + number of e*x registers + null terminator
             cpu::cpuid(reinterpret_cast<int*>(out), cpu::leaf::hypervisor);
@@ -2160,7 +2158,9 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 "\necx: ", static_cast<u32>(out[2]),
                 "\nedx: ", static_cast<u32>(out[3])
             );
-    
+    		if (util::hyper_x() == HYPERV_ARTIFACT_VM) {
+                return false;
+            }
             return (std::strlen(out + 4) >= 4);
         #endif
     }
