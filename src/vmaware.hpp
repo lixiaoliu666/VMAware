@@ -2161,7 +2161,8 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
     		if (util::hyper_x() == HYPERV_ARTIFACT_VM) {
                 return false;
             }
-			debug("HYPERVISOR_STR: strlen(out + 4)=", strlen(out + 4));
+			debug("HYPERVISOR_STR: strlen(out + 4)=", strlen(out + 4),
+				"\nout+4: ", out + 4);
             return (std::strlen(out + 4) >= 4);
         #endif
     }
