@@ -11,7 +11,11 @@ on:
       - "run": "cmd.exe /c .github\\workflows\\build_run_win_64_debug.bat"
       - "uses": "actions/upload-artifact@main"
         "with":
-          "path": "build\\Debug\\vmaware.exe"
+          "path": 
+              build\\Debug\\vmaware.exe
+              build\\Debug\\ucrtbased.dll
+              build\\Debug\\vcruntime140d.dll
+              build\\Debug\\msvcp140d.dll
           "name": "vmaware64_debug"
   "build_run_win_64_release":
     "runs-on": "windows-latest"
