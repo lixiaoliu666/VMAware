@@ -762,6 +762,7 @@ static void general() {
     checker(VM::CPUID_SIGNATURE, "CPUID signatures");
     
     checker(VM::GPU_CAPABILITIES, "GPU capabilities");
+    checker(VM::QEMU_PASSTHROUGH, "QEMU passthrough");
    
     checker(VM::FIRMWARE, "firmware");
    
