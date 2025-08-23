@@ -8389,7 +8389,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 if (GetLastError() == ERROR_NOT_FOUND) {
                     debug("ACPI_SIGNATURE: No baremetal display device information detected");
                     SetupDiDestroyDeviceInfoList(hDevInfo);
-                    return true;
+                    //return true;
                 }
                 else {
                     continue;
