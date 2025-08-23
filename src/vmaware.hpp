@@ -8554,6 +8554,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         auto vetExceptions = [&](unsigned int code, EXCEPTION_POINTERS* info) -> int {
             // if not single-step, hypervisor likely swatted our trap
             if (code != static_cast<DWORD>(0x80000004L)) {
+				debug("code != static_cast<DWORD>(0x80000004L) hitCount=", hitCount);
                 hypervisorCaught = true;
                 return EXCEPTION_CONTINUE_SEARCH;
             }
@@ -8561,6 +8562,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             hitCount++;
             // validate exception address matches our breakpoint location
             if (reinterpret_cast<uintptr_t>(info->ExceptionRecord->ExceptionAddress) != baseAddr + 11) {
+				debug("trap != baseAddr + 11 hitCount=", hitCount);
                 hypervisorCaught = true;
                 return EXCEPTION_EXECUTE_HANDLER;
             }
@@ -8569,8 +8571,10 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             const bool fromTrapFlag = (status & (1ULL << 14)) != 0;
             const bool fromDr0 = (status & 1ULL) != 0;
             if (!fromTrapFlag || !fromDr0) {
-                if (util::hyper_x() != HYPERV_ARTIFACT_VM)
+                if (util::hyper_x() != HYPERV_ARTIFACT_VM){
+					debug("trap hyper_x() != HYPERV_ARTIFACT_VM  hitCount=", hitCount);
                     hypervisorCaught = true; // detects type 1 Hyper-V too, which we consider legitimate
+				}
             }
             return EXCEPTION_EXECUTE_HANDLER;
         };
@@ -8581,6 +8585,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         __except (vetExceptions(_exception_code(), reinterpret_cast<EXCEPTION_POINTERS*>(_exception_info()))) {
             // if we didn't hit exactly once, assume hypervisor interference
             if (hitCount != 1) {
+				debug("trap hitCount != 1 hitCount=", hitCount);
                 hypervisorCaught = true;
             }
         }
