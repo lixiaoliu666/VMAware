@@ -8573,7 +8573,9 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             if (!fromTrapFlag || !fromDr0) {
                 if (util::hyper_x() != HYPERV_ARTIFACT_VM){
 					debug("trap hyper_x() != HYPERV_ARTIFACT_VM  hitCount=", hitCount);
-                    hypervisorCaught = true; // detects type 1 Hyper-V too, which we consider legitimate
+					debug("trap hyper_x()=", util::hyper_x());
+					debug("trap HYPERV_ARTIFACT_VM=", HYPERV_ARTIFACT_VM);
+                    //hypervisorCaught = true; // detects type 1 Hyper-V too, which we consider legitimate
 				}
             }
             return EXCEPTION_EXECUTE_HANDLER;
