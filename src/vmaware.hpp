@@ -8596,7 +8596,10 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             const u64 status = info->ContextRecord->Dr6;
             const bool fromTrapFlag = (status & (1ULL << 14)) != 0;
             const bool fromDr0 = (status & 1ULL) != 0;
+			core_debug("trap !fromTrapFlag==",!fromTrapFlag);
+			core_debug("trap !fromDr0==",!fromDr0);
             if (!fromTrapFlag || !fromDr0) {
+				core_debug("trap !fromTrapFlag || !fromDr0");
                 if (util::hyper_x() != HYPERV_ARTIFACT_VM){
 				
 					debug("trap hyper_x() != HYPERV_ARTIFACT_VM  hitCount=", hitCount);
