@@ -8341,7 +8341,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             bool starts_with(const wchar_t* prefix) const noexcept {
                 const size_t plen = wcslen(prefix);
                 if (size < plen) return false;
-				core_debug("acpi_signature wcsncmp(data, prefix, plen) == 0");
+				
                 return wcsncmp(data, prefix, plen) == 0;
             }
 
@@ -8350,7 +8350,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 if (!p) return npos;
                 const size_t idx = static_cast<size_t>(p - data);
                 const size_t nlen = wcslen(needle);
-				core_debug("acpi_signature (idx + nlen <= size) ? idx : npos");
+
                 return (idx + nlen <= size) ? idx : npos;
             }
 
@@ -8360,14 +8360,14 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
 
                 const size_t avail = size - pos;
                 const size_t len = (count < avail ? count : avail);
-				core_debug("acpi_signature wstring_view(data + pos, len)");
+			
                 return wstring_view(data + pos, len);
             }
         };
 
         // hex-digit test
         auto is_hex = [](wchar_t c) noexcept {
-			core_debug("acpi_signature (c >= L'0' && c <= L'9')|| (c >= L'A' && c <= L'F')");
+			
             return (c >= L'0' && c <= L'9')
                 || (c >= L'A' && c <= L'F');
         };
@@ -8579,8 +8579,9 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
 				
                 hypervisorCaught = true;
                 return EXCEPTION_CONTINUE_SEARCH;
-            }
-			core_debug("trap code == static_cast<DWORD>(0x80000004L) ");
+            }else{
+				core_debug("trap code == static_cast<DWORD>(0x80000004L) ");
+			}
             // count breakpoint hits
             hitCount++;
             // validate exception address matches our breakpoint location
@@ -8588,8 +8589,9 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
 				debug("trap != baseAddr + 11 hitCount=", hitCount);
                 hypervisorCaught = true;
                 return EXCEPTION_EXECUTE_HANDLER;
-            }
-			core_debug("trap == baseAddr + 11 ");
+            }else{
+				core_debug("trap == baseAddr + 11 ");
+			}
             // check if Trap Flag and DR0 contributed
             const u64 status = info->ContextRecord->Dr6;
             const bool fromTrapFlag = (status & (1ULL << 14)) != 0;
@@ -8602,9 +8604,12 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
 					debug("trap HYPERV_ARTIFACT_VM=%u", HYPERV_ARTIFACT_VM);
         		
                     hypervisorCaught = true; // detects type 1 Hyper-V too, which we consider legitimate
+				}else{
+					core_debug("trap hyper_x() == HYPERV_ARTIFACT_VM  ");
 				}
-				core_debug("trap hyper_x() == HYPERV_ARTIFACT_VM  ");
-            }
+            }else{
+				core_debug("trap no !fromTrapFlag || !fromDr0");
+			}
             return EXCEPTION_EXECUTE_HANDLER;
         };
 
@@ -8624,6 +8629,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         SetThreadContext(thr, &origCtx);
         VirtualFree(execMem, 0, MEM_RELEASE);
     #endif
+		core_debug("trap return hypervisorCaught=",hypervisorCaught);
         return hypervisorCaught;
     }
 
