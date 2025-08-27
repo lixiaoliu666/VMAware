@@ -8341,6 +8341,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             bool starts_with(const wchar_t* prefix) const noexcept {
                 const size_t plen = wcslen(prefix);
                 if (size < plen) return false;
+				core_debug("acpi_signature wcsncmp(data, prefix, plen) == 0");
                 return wcsncmp(data, prefix, plen) == 0;
             }
 
@@ -8349,6 +8350,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 if (!p) return npos;
                 const size_t idx = static_cast<size_t>(p - data);
                 const size_t nlen = wcslen(needle);
+				core_debug("acpi_signature (idx + nlen <= size) ? idx : npos");
                 return (idx + nlen <= size) ? idx : npos;
             }
 
@@ -8358,12 +8360,14 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
 
                 const size_t avail = size - pos;
                 const size_t len = (count < avail ? count : avail);
+				core_debug("acpi_signature wstring_view(data + pos, len)");
                 return wstring_view(data + pos, len);
             }
         };
 
         // hex-digit test
         auto is_hex = [](wchar_t c) noexcept {
+			core_debug("acpi_signature (c >= L'0' && c <= L'9')|| (c >= L'A' && c <= L'F')");
             return (c >= L'0' && c <= L'9')
                 || (c >= L'A' && c <= L'F');
         };
@@ -8410,13 +8414,13 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 paths.emplace_back(ptr, len);
                 ptr += (len + 1);
             }
-/**
+
         #ifdef __VMAWARE_DEBUG__
             for (auto& wstr : paths) {
-                debug("ACPI_SIGNATURE: ", wstr);
+                debug("ACPI_SIGNATURE: __VMAWARE_DEBUG__ ", wstr);
             }
         #endif
-*/
+
 
             static constexpr const wchar_t* vm_signatures[] = {
                 L"#ACPI(VMOD)", L"#ACPI(VMBS)", L"#VMBUS(", L"#VPCI("
@@ -8426,6 +8430,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 for (auto sig : vm_signatures) {
                     if (wstr.find(sig) != std::wstring::npos) {
                         SetupDiDestroyDeviceInfoList(hDevInfo);
+						core_debug("acpi_signature core::add(brands::HYPERV)");
                         return core::add(brands::HYPERV);
                     }
                 }
@@ -8461,6 +8466,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 }
                 if (foundQemu) {
                     SetupDiDestroyDeviceInfoList(hDevInfo);
+					core_debug("acpi_signature foundQemu core::add(brands::QEMU)");
                     return core::add(brands::QEMU);
                 }
 
@@ -8479,6 +8485,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                         const wchar_t c2 = vw.data[start + 2];
                         if (c0 == L'S' && is_hex(c1) && is_hex(c2)) {
                             SetupDiDestroyDeviceInfoList(hDevInfo);
+							core_debug("acpi_signature while (true)  core::add(brands::QEMU)");
                             return core::add(brands::QEMU);
                         }
                     }
@@ -8568,11 +8575,12 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             // if not single-step, hypervisor likely swatted our trap
             if (code != static_cast<DWORD>(0x80000004L)) {
 				
-				debug("code != static_cast<DWORD>(0x80000004L) hitCount=", hitCount);
+				debug("trap code != static_cast<DWORD>(0x80000004L) hitCount=", hitCount);
 				
                 hypervisorCaught = true;
                 return EXCEPTION_CONTINUE_SEARCH;
             }
+			core_debug("trap code == static_cast<DWORD>(0x80000004L) ");
             // count breakpoint hits
             hitCount++;
             // validate exception address matches our breakpoint location
@@ -8581,6 +8589,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 hypervisorCaught = true;
                 return EXCEPTION_EXECUTE_HANDLER;
             }
+			core_debug("trap == baseAddr + 11 ");
             // check if Trap Flag and DR0 contributed
             const u64 status = info->ContextRecord->Dr6;
             const bool fromTrapFlag = (status & (1ULL << 14)) != 0;
@@ -8594,6 +8603,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         		
                     hypervisorCaught = true; // detects type 1 Hyper-V too, which we consider legitimate
 				}
+				core_debug("trap hyper_x() == HYPERV_ARTIFACT_VM  ");
             }
             return EXCEPTION_EXECUTE_HANDLER;
         };
