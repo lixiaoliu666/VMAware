@@ -8506,9 +8506,9 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         // AMD CPUs prioritize the breakpoint, setting only its corresponding bit in DR6 and clearing the single-step bit, which is why this technique is not compatible with AMD
 
         if (!cpu::is_intel()) {
-			#ifdef __VMAWARE_DEBUG__
-				debug("trap !cpu::is_intel()");
-        	#endif
+	
+			core_debug("trap !cpu::is_intel() return false");
+      
             return false;
         }
 
@@ -8529,10 +8529,9 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             MEM_COMMIT | MEM_RESERVE,
             PAGE_EXECUTE_READWRITE);
         if (!execMem) {
-			#ifdef __VMAWARE_DEBUG__
-				debug("trap !execMem");
-        	#endif
 			
+			core_debug("trap !execMem return false");
+        
             return false;
         }
         memcpy(execMem, trampoline, trampSize);
@@ -8545,10 +8544,9 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         const HANDLE thr = GetCurrentThread();
         if (!GetThreadContext(thr, &origCtx)) {
             VirtualFree(execMem, 0, MEM_RELEASE);
-			#ifdef __VMAWARE_DEBUG__
-				debug("trap !GetThreadContext(thr, &origCtx)");
-        	#endif
 			
+			core_debug("trap !GetThreadContext(thr, &origCtx) return false");
+        
             return false;
         }
 
@@ -8560,19 +8558,17 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         if (!SetThreadContext(thr, &dbgCtx)) {
             SetThreadContext(thr, &origCtx);
             VirtualFree(execMem, 0, MEM_RELEASE);
-			#ifdef __VMAWARE_DEBUG__
-				debug("trap !SetThreadContext(thr, &dbgCtx)");
-        	#endif
-			
+		
+			core_debug("trap !SetThreadContext(thr, &dbgCtx) return false");
+        	
             return false;
         }
 
         auto vetExceptions = [&](unsigned int code, EXCEPTION_POINTERS* info) -> int {
             // if not single-step, hypervisor likely swatted our trap
             if (code != static_cast<DWORD>(0x80000004L)) {
-				#ifdef __VMAWARE_DEBUG__
-					debug("code != static_cast<DWORD>(0x80000004L) hitCount=", hitCount);
-        		#endif
+				
+				debug("code != static_cast<DWORD>(0x80000004L) hitCount=", hitCount);
 				
                 hypervisorCaught = true;
                 return EXCEPTION_CONTINUE_SEARCH;
@@ -8591,12 +8587,11 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             const bool fromDr0 = (status & 1ULL) != 0;
             if (!fromTrapFlag || !fromDr0) {
                 if (util::hyper_x() != HYPERV_ARTIFACT_VM){
-					#ifdef __VMAWARE_DEBUG__
-						debug("trap hyper_x() != HYPERV_ARTIFACT_VM  hitCount=", hitCount);
-						debug("trap hyper_x()=%u", util::hyper_x());
-						debug("trap HYPERV_ARTIFACT_VM=%u", HYPERV_ARTIFACT_VM);
-        			#endif
-					
+				
+					debug("trap hyper_x() != HYPERV_ARTIFACT_VM  hitCount=", hitCount);
+					debug("trap hyper_x()=%u", util::hyper_x());
+					debug("trap HYPERV_ARTIFACT_VM=%u", HYPERV_ARTIFACT_VM);
+        		
                     hypervisorCaught = true; // detects type 1 Hyper-V too, which we consider legitimate
 				}
             }
@@ -8609,10 +8604,9 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         __except (vetExceptions(_exception_code(), reinterpret_cast<EXCEPTION_POINTERS*>(_exception_info()))) {
             // if we didn't hit exactly once, assume hypervisor interference
             if (hitCount != 1) {
-				#ifdef __VMAWARE_DEBUG__
-						debug("trap hitCount != 1 hitCount=", hitCount);
-        		#endif
-				
+			
+				debug("trap hitCount != 1 hitCount=", hitCount);
+        		
                 hypervisorCaught = true;
             }
         }
