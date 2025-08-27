@@ -8389,7 +8389,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 if (GetLastError() == ERROR_NOT_FOUND) {
                     debug("ACPI_SIGNATURE: No baremetal display device information detected");
                     SetupDiDestroyDeviceInfoList(hDevInfo);
-                    //return true;
+                    return true;
                 }
                 else {
                     continue;
@@ -8410,12 +8410,13 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 paths.emplace_back(ptr, len);
                 ptr += (len + 1);
             }
-
+/**
         #ifdef __VMAWARE_DEBUG__
             for (auto& wstr : paths) {
                 debug("ACPI_SIGNATURE: ", wstr);
             }
         #endif
+*/
 
             static constexpr const wchar_t* vm_signatures[] = {
                 L"#ACPI(VMOD)", L"#ACPI(VMBS)", L"#VMBUS(", L"#VPCI("
@@ -8505,7 +8506,9 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         // AMD CPUs prioritize the breakpoint, setting only its corresponding bit in DR6 and clearing the single-step bit, which is why this technique is not compatible with AMD
 
         if (!cpu::is_intel()) {
-			debug("trap !cpu::is_intel()");
+			#ifdef __VMAWARE_DEBUG__
+				debug("trap !cpu::is_intel()");
+        	#endif
             return false;
         }
 
@@ -8526,7 +8529,10 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             MEM_COMMIT | MEM_RESERVE,
             PAGE_EXECUTE_READWRITE);
         if (!execMem) {
-			debug("trap !execMem");
+			#ifdef __VMAWARE_DEBUG__
+				debug("trap !execMem");
+        	#endif
+			
             return false;
         }
         memcpy(execMem, trampoline, trampSize);
@@ -8539,7 +8545,10 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         const HANDLE thr = GetCurrentThread();
         if (!GetThreadContext(thr, &origCtx)) {
             VirtualFree(execMem, 0, MEM_RELEASE);
-			debug("trap !GetThreadContext(thr, &origCtx)");
+			#ifdef __VMAWARE_DEBUG__
+				debug("trap !GetThreadContext(thr, &origCtx)");
+        	#endif
+			
             return false;
         }
 
@@ -8551,14 +8560,20 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         if (!SetThreadContext(thr, &dbgCtx)) {
             SetThreadContext(thr, &origCtx);
             VirtualFree(execMem, 0, MEM_RELEASE);
-			debug("trap !SetThreadContext(thr, &dbgCtx)");
+			#ifdef __VMAWARE_DEBUG__
+				debug("trap !SetThreadContext(thr, &dbgCtx)");
+        	#endif
+			
             return false;
         }
 
         auto vetExceptions = [&](unsigned int code, EXCEPTION_POINTERS* info) -> int {
             // if not single-step, hypervisor likely swatted our trap
             if (code != static_cast<DWORD>(0x80000004L)) {
-				debug("code != static_cast<DWORD>(0x80000004L) hitCount=", hitCount);
+				#ifdef __VMAWARE_DEBUG__
+					debug("code != static_cast<DWORD>(0x80000004L) hitCount=", hitCount);
+        		#endif
+				
                 hypervisorCaught = true;
                 return EXCEPTION_CONTINUE_SEARCH;
             }
@@ -8576,9 +8591,12 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             const bool fromDr0 = (status & 1ULL) != 0;
             if (!fromTrapFlag || !fromDr0) {
                 if (util::hyper_x() != HYPERV_ARTIFACT_VM){
-					debug("trap hyper_x() != HYPERV_ARTIFACT_VM  hitCount=", hitCount);
-					debug("trap hyper_x()=%u", util::hyper_x());
-					debug("trap HYPERV_ARTIFACT_VM=%u", HYPERV_ARTIFACT_VM);
+					#ifdef __VMAWARE_DEBUG__
+						debug("trap hyper_x() != HYPERV_ARTIFACT_VM  hitCount=", hitCount);
+						debug("trap hyper_x()=%u", util::hyper_x());
+						debug("trap HYPERV_ARTIFACT_VM=%u", HYPERV_ARTIFACT_VM);
+        			#endif
+					
                     hypervisorCaught = true; // detects type 1 Hyper-V too, which we consider legitimate
 				}
             }
@@ -8591,7 +8609,10 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         __except (vetExceptions(_exception_code(), reinterpret_cast<EXCEPTION_POINTERS*>(_exception_info()))) {
             // if we didn't hit exactly once, assume hypervisor interference
             if (hitCount != 1) {
-				debug("trap hitCount != 1 hitCount=", hitCount);
+				#ifdef __VMAWARE_DEBUG__
+						debug("trap hitCount != 1 hitCount=", hitCount);
+        		#endif
+				
                 hypervisorCaught = true;
             }
         }
