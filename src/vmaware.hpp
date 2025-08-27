@@ -8505,6 +8505,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         // AMD CPUs prioritize the breakpoint, setting only its corresponding bit in DR6 and clearing the single-step bit, which is why this technique is not compatible with AMD
 
         if (!cpu::is_intel()) {
+			debug("trap !cpu::is_intel()");
             return false;
         }
 
@@ -8525,6 +8526,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             MEM_COMMIT | MEM_RESERVE,
             PAGE_EXECUTE_READWRITE);
         if (!execMem) {
+			debug("trap !execMem");
             return false;
         }
         memcpy(execMem, trampoline, trampSize);
@@ -8537,6 +8539,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         const HANDLE thr = GetCurrentThread();
         if (!GetThreadContext(thr, &origCtx)) {
             VirtualFree(execMem, 0, MEM_RELEASE);
+			debug("trap !GetThreadContext(thr, &origCtx)");
             return false;
         }
 
@@ -8548,6 +8551,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         if (!SetThreadContext(thr, &dbgCtx)) {
             SetThreadContext(thr, &origCtx);
             VirtualFree(execMem, 0, MEM_RELEASE);
+			debug("trap !SetThreadContext(thr, &dbgCtx)");
             return false;
         }
 
@@ -8573,9 +8577,9 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             if (!fromTrapFlag || !fromDr0) {
                 if (util::hyper_x() != HYPERV_ARTIFACT_VM){
 					debug("trap hyper_x() != HYPERV_ARTIFACT_VM  hitCount=", hitCount);
-					debug("trap hyper_x()=", util::hyper_x());
-					debug("trap HYPERV_ARTIFACT_VM=", HYPERV_ARTIFACT_VM);
-                    //hypervisorCaught = true; // detects type 1 Hyper-V too, which we consider legitimate
+					debug("trap hyper_x()=%u", util::hyper_x());
+					debug("trap HYPERV_ARTIFACT_VM=%u", HYPERV_ARTIFACT_VM);
+                    hypervisorCaught = true; // detects type 1 Hyper-V too, which we consider legitimate
 				}
             }
             return EXCEPTION_EXECUTE_HANDLER;
