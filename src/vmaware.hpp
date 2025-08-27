@@ -8594,6 +8594,7 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
 			}
             // check if Trap Flag and DR0 contributed
             const u64 status = info->ContextRecord->Dr6;
+			core_debug("trap status= = info->ContextRecord->Dr6=",status);
             const bool fromTrapFlag = (status & (1ULL << 14)) != 0;
             const bool fromDr0 = (status & 1ULL) != 0;
 			core_debug("trap fromTrapFlag==",fromTrapFlag);
