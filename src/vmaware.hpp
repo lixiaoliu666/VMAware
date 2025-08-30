@@ -8341,7 +8341,6 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             bool starts_with(const wchar_t* prefix) const noexcept {
                 const size_t plen = wcslen(prefix);
                 if (size < plen) return false;
-				
                 return wcsncmp(data, prefix, plen) == 0;
             }
 
@@ -8350,7 +8349,6 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 if (!p) return npos;
                 const size_t idx = static_cast<size_t>(p - data);
                 const size_t nlen = wcslen(needle);
-
                 return (idx + nlen <= size) ? idx : npos;
             }
 
@@ -8360,14 +8358,12 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
 
                 const size_t avail = size - pos;
                 const size_t len = (count < avail ? count : avail);
-			
                 return wstring_view(data + pos, len);
             }
         };
 
         // hex-digit test
         auto is_hex = [](wchar_t c) noexcept {
-			
             return (c >= L'0' && c <= L'9')
                 || (c >= L'A' && c <= L'F');
         };
@@ -8417,10 +8413,9 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
 
         #ifdef __VMAWARE_DEBUG__
             for (auto& wstr : paths) {
-                debug("ACPI_SIGNATURE: __VMAWARE_DEBUG__ ", wstr);
+                debug("ACPI_SIGNATURE: ", wstr);
             }
         #endif
-
 
             static constexpr const wchar_t* vm_signatures[] = {
                 L"#ACPI(VMOD)", L"#ACPI(VMBS)", L"#VMBUS(", L"#VPCI("
@@ -8430,7 +8425,6 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 for (auto sig : vm_signatures) {
                     if (wstr.find(sig) != std::wstring::npos) {
                         SetupDiDestroyDeviceInfoList(hDevInfo);
-						core_debug("acpi_signature core::add(brands::HYPERV)");
                         return core::add(brands::HYPERV);
                     }
                 }
@@ -8466,7 +8460,6 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                 }
                 if (foundQemu) {
                     SetupDiDestroyDeviceInfoList(hDevInfo);
-					core_debug("acpi_signature foundQemu core::add(brands::QEMU)");
                     return core::add(brands::QEMU);
                 }
 
@@ -8485,7 +8478,6 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
                         const wchar_t c2 = vw.data[start + 2];
                         if (c0 == L'S' && is_hex(c1) && is_hex(c2)) {
                             SetupDiDestroyDeviceInfoList(hDevInfo);
-							core_debug("acpi_signature while (true)  core::add(brands::QEMU)");
                             return core::add(brands::QEMU);
                         }
                     }
@@ -8513,9 +8505,6 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         // AMD CPUs prioritize the breakpoint, setting only its corresponding bit in DR6 and clearing the single-step bit, which is why this technique is not compatible with AMD
 
         if (!cpu::is_intel()) {
-	
-			core_debug("trap !cpu::is_intel() return false");
-      
             return false;
         }
 
@@ -8536,9 +8525,6 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
             MEM_COMMIT | MEM_RESERVE,
             PAGE_EXECUTE_READWRITE);
         if (!execMem) {
-			
-			core_debug("trap !execMem return false");
-        
             return false;
         }
         memcpy(execMem, trampoline, trampSize);
@@ -8551,9 +8537,6 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         const HANDLE thr = GetCurrentThread();
         if (!GetThreadContext(thr, &origCtx)) {
             VirtualFree(execMem, 0, MEM_RELEASE);
-			
-			core_debug("trap !GetThreadContext(thr, &origCtx) return false");
-        
             return false;
         }
 
@@ -8565,55 +8548,30 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         if (!SetThreadContext(thr, &dbgCtx)) {
             SetThreadContext(thr, &origCtx);
             VirtualFree(execMem, 0, MEM_RELEASE);
-		
-			core_debug("trap !SetThreadContext(thr, &dbgCtx) return false");
-        	
             return false;
         }
 
         auto vetExceptions = [&](unsigned int code, EXCEPTION_POINTERS* info) -> int {
             // if not single-step, hypervisor likely swatted our trap
             if (code != static_cast<DWORD>(0x80000004L)) {
-				
-				debug("trap code != static_cast<DWORD>(0x80000004L) hitCount=", hitCount);
-				
                 hypervisorCaught = true;
                 return EXCEPTION_CONTINUE_SEARCH;
-            }else{
-				core_debug("trap code == static_cast<DWORD>(0x80000004L) ");
-			}
+            }
             // count breakpoint hits
             hitCount++;
             // validate exception address matches our breakpoint location
             if (reinterpret_cast<uintptr_t>(info->ExceptionRecord->ExceptionAddress) != baseAddr + 11) {
-				debug("trap != baseAddr + 11 hitCount=", hitCount);
                 hypervisorCaught = true;
                 return EXCEPTION_EXECUTE_HANDLER;
-            }else{
-				core_debug("trap == baseAddr + 11 ");
-			}
+            }
             // check if Trap Flag and DR0 contributed
             const u64 status = info->ContextRecord->Dr6;
-			core_debug("trap status= = info->ContextRecord->Dr6=",status);
             const bool fromTrapFlag = (status & (1ULL << 14)) != 0;
             const bool fromDr0 = (status & 1ULL) != 0;
-			core_debug("trap fromTrapFlag==",fromTrapFlag);
-			core_debug("trap fromDr0==",fromDr0);
             if (!fromTrapFlag || !fromDr0) {
-				core_debug("trap !fromTrapFlag || !fromDr0");
-                if (util::hyper_x() != HYPERV_ARTIFACT_VM){
-				
-					debug("trap hyper_x() != HYPERV_ARTIFACT_VM  hitCount=", hitCount);
-					debug("trap hyper_x()=%u", util::hyper_x());
-					debug("trap HYPERV_ARTIFACT_VM=%u", HYPERV_ARTIFACT_VM);
-        		
+                if (util::hyper_x() != HYPERV_ARTIFACT_VM)
                     hypervisorCaught = true; // detects type 1 Hyper-V too, which we consider legitimate
-				}else{
-					core_debug("trap hyper_x() == HYPERV_ARTIFACT_VM  ");
-				}
-            }else{
-				core_debug("trap no !fromTrapFlag || !fromDr0");
-			}
+            }
             return EXCEPTION_EXECUTE_HANDLER;
         };
 
@@ -8623,9 +8581,6 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         __except (vetExceptions(_exception_code(), reinterpret_cast<EXCEPTION_POINTERS*>(_exception_info()))) {
             // if we didn't hit exactly once, assume hypervisor interference
             if (hitCount != 1) {
-			
-				debug("trap hitCount != 1 hitCount=", hitCount);
-        		
                 hypervisorCaught = true;
             }
         }
@@ -8633,7 +8588,6 @@ private: // START OF PRIVATE VM DETECTION TECHNIQUE DEFINITIONS
         SetThreadContext(thr, &origCtx);
         VirtualFree(execMem, 0, MEM_RELEASE);
     #endif
-		core_debug("trap return hypervisorCaught=",hypervisorCaught);
         return hypervisorCaught;
     }
 
